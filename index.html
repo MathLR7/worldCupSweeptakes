@@ -34,13 +34,12 @@
     </div>
 
     <script>
-        // Certifique-se de que este link é especificamente da aba RESULTADOS publicada como CSV
         const urlPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdAyMuLVcXtZNNO7h6w9IEdh5C-7Nx3b9KH8lRbLgVbS72ibopJNVnUDp_PSsSuNJn_7pXU-YnopvK/pub?gid=687676323&single=true&output=csv";
 
         function carregarDados() {
             Papa.parse(urlPlanilha, {
                 download: true,
-                header: false, // Desativado para usarmos os índices numéricos das colunas (0=A, 5=F)
+                header: false, 
                 complete: function(results) {
                     processarEExibir(results.data);
                 },
@@ -59,23 +58,16 @@
 
             let participantes = [];
 
-            // Varre todas as linhas da planilha, não importa a posição
             linhas.forEach((dadosLinha) => {
-                // Verifica se a linha é válida e se tem o texto de pontuação na coluna D (índice 3)
                 if (dadosLinha && dadosLinha[3]) {
                     const textoColunaD = dadosLinha[3].toString().trim();
 
-                    // Se encontrarmos o texto padrão, sabemos que essa linha tem o Nome e os Pontos Totais
                     if (textoColunaD.toLowerCase().includes("pontuacao total ate agora")) {
-                        
-                        // Coluna A (índice 0) tem o nome do participante
                         const nome = dadosLinha[0] ? dadosLinha[0].trim() : '';
                         
-                        // Coluna F (índice 5) tem os pontos
                         let pontos = dadosLinha[5] ? dadosLinha[5].toString().replace(',', '.') : '0';
                         pontos = parseFloat(pontos) || 0;
 
-                        // Só adiciona se houver um nome preenchido na célula A
                         if (nome) {
                             participantes.push({ nome: nome, pontos: pontos });
                         }
@@ -83,10 +75,8 @@
                 }
             });
 
-            // Ordena os participantes do maior ponto para o menor
             participantes.sort((a, b) => b.pontos - a.pontos);
 
-            // Desenha as linhas na tabela do site
             participantes.forEach((participante, index) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 transition-colors";
@@ -100,16 +90,16 @@
                 tr.innerHTML = `
                     <td class="px-5 py-4 font-bold text-gray-700">${medalha}</td>
                     <td class="px-5 py-4 text-gray-900 font-medium">${participante.nome}</td>
-                    <td class="px-5 py-4 font-bold text-amber-500">${participante.pontos} pts</td>                corpoTabela.appendChild(tr);
+                    <td class="px-5 py-4 font-bold text-emerald-600">${participante.pontos} pts</td>
+                `;
+                corpoTabela.appendChild(tr);
             });
 
-            // Caso ninguém tenha sido encontrado
             if (participantes.length === 0) {
                 corpoTabela.innerHTML = `<tr><td colspan="3" class="px-5 py-5 text-center text-gray-500">Nenhum participante encontrado. Verifique se o link do CSV está correto.</td></tr>`;
             }
         }
 
-        // Inicializa a busca
         carregarDados();
     </script>
 </body>
