@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificação do Bolão</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+
+    <div class="max-w-4xl mx-auto py-10 px-4">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-blue-600 drop-shadow-sm">🏆 Placar do Bolão 🏆</h1>
+            <p class="text-gray-600 mt-2">Atualizado automaticamente a partir da página RESULTADOS</p>
+        </header>
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr class="bg-blue-500 text-white text-left text-sm uppercase font-semibold">
+                        <th class="px-5 py-3">Posição</th>
+                        <th class="px-5 py-3">Participante</th>
+                        <th class="px-5 py-3">Pontos</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-corpo" class="divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="3" class="px-5 py-5 text-center text-gray-500">Carregando pontuações...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Certifique-se de que este link é especificamente da aba RESULTADOS publicada como CSV
+        const urlPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdAyMuLVcXtZNNO7h6w9IEdh5C-7Nx3b9KH8lRbLgVbS72ibopJNVnUDp_PSsSuNJn_7pXU-YnopvK/pub?gid=687676323&single=true&output=csv";
+
+        function carregarDados() {
+            Papa.parse(urlPlanilha, {
+                download: true,
+                header: false, // Desativado para usarmos os índices numéricos das colunas (0=A, 5=F)
+                complete: function(results) {
+                    processarEExibir(results.data);
+                },
+                error: function(err) {
+                    console.error("Erro ao ler a planilha:", err);
+                    document.getElementById('tabela-corpo').innerHTML = `
+                        <tr><td colspan="3" class="px-5 py-5 text-center text-red-500">Erro ao carregar dados.</td></tr>
+                    `;
+                }
+            });
+        }
+
+        function processarEExibir(linhas) {
+            const corpoTabela = document.getElementById('tabela-corpo');
+            corpoTabela.innerHTML = ''; 
+
+            // Mapeamento das linhas exatas que você mandou.
+            // No Excel/Sheets a linha 2 é o índice 1 no JavaScript (pois começa em 0)
+            const linhasDesejadas = [1, 23, 44, 66, 88, 110, 132]; 
+            
+            let participantes = [];
+
+            linhasDesejadas.forEach(indiceLinha => {
+                // Verifica se a linha realmente existe no arquivo retornado
+                if (linhas[indiceLinha]) {
+                    const dadosLinha = linhas[indiceLinha];
+                    
+                    // Coluna A é o índice 0, Coluna F é o índice 5
+                    const nome = dadosLinha[0] ? dadosLinha[0].trim() : '';
+                    // Convertemos o ponto para número. Se houver vírgula na planilha, trocamos por ponto.
+                    let pontos = dadosLinha[5] ? dadosLinha[5].toString().replace(',', '.') : '0';
+                    pontos = parseFloat(pontos) || 0;
+
+                    // Só adiciona se o nome não estiver vazio
+                    if (nome) {
+                        participantes.push({ nome: nome, pontos: points });
+                    }
+                }
+            });
+
+            // Ordena os participantes do maior ponto para o menor
+            participantes.sort((a, b) => b.pontos - a.pontos);
+
+            // Desenha as linhas na tabela do site
+            participantes.forEach((participante, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+
+                const posicao = index + 1;
+                let medalha = posicao;
+                if (posicao === 1) medalha = '🥇';
+                if (posicao === 2) medalha = '🥈';
+                if (posicao === 3) medalha = '🥉';
+
+                tr.innerHTML = `
+                    <td class="px-5 py-4 font-bold text-gray-700">${medalha}</td>
+                    <td class="px-5 py-4 text-gray-900 font-medium">${participante.nome}</td>
+                    <td class="px-5 py-4 font-bold text-blue-600">${participante.pontos} pts</td>
+                `;
+                corpoTabela.appendChild(tr);
+            });
+
+            // Caso ninguém tenha sido encontrado
+            if (participantes.length === 0) {
+                corpoTabela.innerHTML = `<tr><td colspan="3" class="px-5 py-5 text-center text-gray-500">Nenhum dado encontrado nas células especificadas.</td></tr>`;
+            }
+        }
+
+        // Inicializa a busca
+        carregarDados();
+    </script>
+</body>
+</html>
