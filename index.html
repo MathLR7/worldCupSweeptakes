@@ -123,11 +123,18 @@
                 }
             });
 
+            // Ordena os participantes do maior para o menor
             participantes.sort((a, b) => b.pontos - a.pontos);
+
+            // --- LÓGICA DO SOBE E DESCE (Memória do Navegador) ---
+            // 1. Puxa o ranking antigo salvo no cache (se existir)
+            const rankingAntigo = JSON.parse(localStorage.getItem('rankingBolaoCopa')) || {};
+            // 2. Cria um objeto vazio para salvar o ranking de hoje
+            const rankingNovo = {};
+            // -------------------------------------------------------
 
             participantes.forEach((participante, index) => {
                 const tr = document.createElement('tr');
-                // Adicionado efeito de transição suave, leve aumento de tamanho e sombra no hover
                 tr.className = "hover:bg-emerald-50/50 transition-all duration-200 transform hover:scale-[1.01] hover:shadow-sm cursor-pointer";
 
                 const posicao = index + 1;
@@ -136,13 +143,40 @@
                 if (posicao === 2) medalha = '🥈';
                 if (posicao === 3) medalha = '🥉';
 
+                // --- CALCULA A TENDÊNCIA ---
+                let iconeTendencia = '<span class="text-gray-300 text-sm font-bold ml-2" title="Manteve a posição">-</span>'; // Neutro
+
+                // Verifica se o participante já estava no cache para comparar
+                if (rankingAntigo[participante.nome]) {
+                    const posicaoAntiga = rankingAntigo[participante.nome];
+                    
+                    if (posicao < posicaoAntiga) {
+                        // Subiu na tabela (número da posição diminuiu)
+                        iconeTendencia = '<span class="text-emerald-500 text-sm font-bold ml-2" title="Subiu">▲</span>';
+                    } else if (posicao > posicaoAntiga) {
+                        // Caiu na tabela (número da posição aumentou)
+                        iconeTendencia = '<span class="text-red-500 text-sm font-bold ml-2" title="Caiu">▼</span>';
+                    }
+                }
+
+                // Salva a posição atual para a próxima vez que o usuário abrir o site
+                rankingNovo[participante.nome] = posicao;
+                // ---------------------------
+
+                // Adicionei flex e items-center na primeira <td> para a posição e a setinha ficarem alinhadas
                 tr.innerHTML = `
-                    <td class="px-5 py-4 font-bold text-gray-700">${medalha}</td>
+                    <td class="px-5 py-4 font-bold text-gray-700 flex items-center">
+                        <span class="w-5 text-center">${medalha}</span>
+                        ${iconeTendencia}
+                    </td>
                     <td class="px-5 py-4 text-gray-900 font-medium">${participante.nome}</td>
                     <td class="px-5 py-4 font-bold text-emerald-600">${participante.pontos} pts</td>
                 `;
                 corpoTabela.appendChild(tr);
             });
+
+            // Atualiza o cache do navegador com as posições de hoje
+            localStorage.setItem('rankingBolaoCopa', JSON.stringify(rankingNovo));
 
             if (participantes.length === 0) {
                 corpoTabela.innerHTML = `<tr><td colspan="3" class="px-5 py-5 text-center text-gray-500">Nenhum participante encontrado. Verifique se o link do CSV está correto.</td></tr>`;
