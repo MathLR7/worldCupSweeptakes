@@ -55,14 +55,16 @@
     </div>
 
     <script>
-        const urlPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdAyMuLVcXtZNNO7h6w9IEdh5C-7Nx3b9KH8lRbLgVbS72ibopJNVnUDp_PSsSuNJn_7pXU-YnopvK/pub?gid=687676323&single=true&output=csv";
+        const urlBasePlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdAyMuLVcXtZNNO7h6w9IEdh5C-7Nx3b9KH8lRbLgVbS72ibopJNVnUDp_PSsSuNJn_7pXU-YnopvK/pub?gid=687676323&single=true&output=csv";
 
         function carregarDados() {
-            // Marca o exato momento em que o carregamento começou
             const tempoInicio = Date.now(); 
-            const tempoMinimoCarregamento = 1500; // 1.5 segundos em milissegundos
+            const tempoMinimoCarregamento = 1500; 
 
-            Papa.parse(urlPlanilha, {
+            // Adiciona o timestamp no final da URL para quebrar o cache do navegador
+            const urlSemCache = urlBasePlanilha + "&t=" + Date.now();
+
+            Papa.parse(urlSemCache, {
                 download: true,
                 header: false, 
                 complete: function(results) {
