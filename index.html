@@ -58,17 +58,44 @@
         const urlPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdAyMuLVcXtZNNO7h6w9IEdh5C-7Nx3b9KH8lRbLgVbS72ibopJNVnUDp_PSsSuNJn_7pXU-YnopvK/pub?gid=687676323&single=true&output=csv";
 
         function carregarDados() {
+            // Marca o exato momento em que o carregamento começou
+            const tempoInicio = Date.now(); 
+            const tempoMinimoCarregamento = 1500; // 1.5 segundos em milissegundos
+
             Papa.parse(urlPlanilha, {
                 download: true,
                 header: false, 
                 complete: function(results) {
-                    processarEExibir(results.data);
+                    // Calcula quanto tempo a planilha levou para baixar
+                    const tempoDecorrido = Date.now() - tempoInicio;
+                    const tempoRestante = tempoMinimoCarregamento - tempoDecorrido;
+
+                    // Se baixou muito rápido, espera o tempo que sobrou
+                    if (tempoRestante > 0) {
+                        setTimeout(() => {
+                            processarEExibir(results.data);
+                        }, tempoRestante);
+                    } else {
+                        // Se a internet estiver lenta e já passou de 1.5s, exibe imediatamente
+                        processarEExibir(results.data);
+                    }
                 },
                 error: function(err) {
                     console.error("Erro ao ler a planilha:", err);
-                    document.getElementById('tabela-corpo').innerHTML = `
-                        <tr><td colspan="3" class="px-5 py-5 text-center text-red-500">Erro ao carregar dados.</td></tr>
-                    `;
+                    const tempoDecorrido = Date.now() - tempoInicio;
+                    const tempoRestante = tempoMinimoCarregamento - tempoDecorrido;
+
+                    const mostrarErro = () => {
+                        document.getElementById('tabela-corpo').innerHTML = `
+                            <tr><td colspan="3" class="px-5 py-5 text-center text-red-500">Erro ao carregar dados.</td></tr>
+                        `;
+                    };
+
+                    if (tempoRestante > 0) {
+                        setTimeout(mostrarErro, tempoRestante);
+                    } else {
+                        mostrarErro();
+                    }
                 }
             });
         }
