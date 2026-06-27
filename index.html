@@ -29,7 +29,7 @@
                         <td colspan="3" class="px-5 py-8 text-center">
                             <div class="flex flex-col items-center justify-center space-y-3">
                                 <div class="text-4xl animate-spin">⚽</div>
-                                <div class="text-gray-400 font-medium animate-pulse">Aquecendo as chuteiras...</div>
+                                <div id="mensagem-carregamento" class="text-gray-400 font-medium animate-pulse"></div>
                             </div>
                         </td>
                     </tr>
@@ -120,6 +120,27 @@
             if (participantes.length === 0) {
                 corpoTabela.innerHTML = `<tr><td colspan="3" class="px-5 py-5 text-center text-gray-500">Nenhum participante encontrado. Verifique se o link do CSV está correto.</td></tr>`;
             }
+        }
+
+
+        // --- Lógica das mensagens aleatórias de carregamento ---
+        const mensagens = [
+            "Zikando o Gaspar...",
+            "Perguntando ao Cara...",
+            "Desviando dinheiro pro Vasco...",
+            "kkkkkkkk Souza perdeu 300 conto...",
+            "Pagando o Paquetá...",
+            "Roubando pontos do Marinho...",
+            "Analisando VARmengo...",
+        ];
+
+        // Sorteia um número aleatório baseado no tamanho da lista
+        const indiceSorteado = Math.floor(Math.random() * mensagens.length);
+
+        // Encontra a div pelo ID e injeta a mensagem sorteada
+        const divMensagem = document.getElementById('mensagem-carregamento');
+        if (divMensagem) {
+            divMensagem.innerText = mensagens[indiceSorteado];
         }
 
         carregarDados();
