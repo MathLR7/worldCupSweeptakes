@@ -91,7 +91,8 @@
 
             participantes.forEach((participante, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition-colors";
+                // Adicionado efeito de transição suave, leve aumento de tamanho e sombra no hover
+                tr.className = "hover:bg-emerald-50/50 transition-all duration-200 transform hover:scale-[1.01] hover:shadow-sm cursor-pointer";
 
                 const posicao = index + 1;
                 let medalha = posicao;
